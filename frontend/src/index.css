@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Righteous&family=Road+Rage&family=Roboto+Flex:opsz,wght@8..144,100..1000&family=Roboto+Slab:wght@100..900&display=swap');
+
+@plugin 'tailwindcss-animate';
+
+@custom-variant dark (&:is(.dark *));
+@import "tailwindcss";
+
+@theme {
+    --font-righteous: "Righteous", sans-serif;
+    --font-road-rage: "Road Rage", cursive;
+    --font-roboto-flex: "Roboto Flex", sans-serif;
+    --font-roboto-slab: "Roboto Slab", serif;
+}
+
+body {
+    background-color: #020A1E;
+    color: #FFFFFF;
+}
+
+:root {
+    --radius: 0.6rem;
+    --color-1: hsl(0 100% 63%);
+    --color-2: hsl(270 100% 63%);
+    --color-3: hsl(210 100% 63%);
+    --color-4: hsl(195 100% 63%);
+    --color-5: hsl(90 100% 63%);
+}
+
+@theme inline {
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+    --color-color-5: var(----color-5);
+    --color-color-4: var(----color-4);
+    --color-color-3: var(----color-3);
+    --color-color-2: var(----color-2);
+    --color-color-1: var(----color-1);
+  --animate-rainbow: rainbow var(--speed, 2s) infinite linear;
+
+  @keyframes rainbow {
+    0% {
+      background-position: 0%;
+        }
+    100% {
+      background-position: 200%;
+        }
+    }
+  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
+  --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
+
+  @keyframes shimmer-slide {
+    to {
+      transform: translate(calc(100cqw - 100%), 0);
+        }
+    }
+
+  @keyframes spin-around {
+    0% {
+      transform: translateZ(0) rotate(0);
+        }
+    15%, 35% {
+      transform: translateZ(0) rotate(90deg);
+        }
+    65%, 85% {
+      transform: translateZ(0) rotate(270deg);
+        }
+    100% {
+      transform: translateZ(0) rotate(360deg);
+        }
+    }
+}
+
+.dark {
+    --color-1: hsl(0 100% 63%);
+    --color-2: hsl(270 100% 63%);
+    --color-3: hsl(210 100% 63%);
+    --color-4: hsl(195 100% 63%);
+    --color-5: hsl(90 100% 63%);
+}
