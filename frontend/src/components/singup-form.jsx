@@ -11,12 +11,83 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 
-export function SingupForm({
-    className,
-    ...props
-}) {
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useSignupMutation } from "@/features/auth/authApiSlice"
+import { useDispatch } from "react-redux"
+import { setUserCredentials } from "@/features/auth/authSlice"
+import toast from "react-hot-toast"
+import { useNavigate } from "react-router-dom"
+import { useSelector } from "react-redux"
+import { useEffect } from "react"
+
+const schema = z.object({
+    username: z.string().min(3, "Username must be at least 3 characters"),
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    avatar: z
+        .custom((fileList) => fileList instanceof FileList && fileList.length > 0, "Avatar is required")
+        .transform((fileList) => fileList[0]), // Convert FileList to single file
+    role: z.enum(["MEMBER", "ADMIN"], { message: "Role must be either Member or Admin" }),
+})
+
+
+export function SingupForm({ className }) {
+
+
+    const {
+        register,
+        handleSubmit,
+        setValue
+    } = useForm({
+        resolver: zodResolver(schema),
+        defaultValues: {
+            username: "",
+            email: "",
+            password: "",
+            role: "MEMBER",
+            avatar: undefined
+        }
+    })
+    const { user, isLoggedIn } = useSelector((state) => state.auth)
+    const [signup, { isLoading }] = useSignupMutation();
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if (isLoggedIn && user) {
+            if (user.role === "ADMIN") {
+                navigate("/dashboard-admin")
+            } else if (user.role === "MEMBER") {
+                navigate("/dashboard-member")
+            }
+        }
+    }, [isLoggedIn, user, navigate])
+
+
+    const onSubmit = async (data) => {
+        try {
+            console.log(data)
+            const formData = new FormData();
+            formData.append('username', data.username);
+            formData.append('email', data.email);
+            formData.append('password', data.password);
+            formData.append('role', data.role);
+            formData.append('avatar', data.avatar);
+            
+            const response = await signup(formData).unwrap()
+            toast.success("User signed up successfully")
+            dispatch(setUserCredentials(response.data))
+            console.log(response)
+        } catch (error) {
+            console.error(error)
+            toast.error(error?.data?.message || "Something went wrong")
+        }
+    }
+
     return (
-        (<form className={cn("flex flex-col gap-6", className)} {...props}>
+        <form onSubmit={handleSubmit(onSubmit)} className={cn("flex flex-col gap-6", className)}>
             <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">Create a new account</h1>
                 <p className="text-balance text-sm text-slate-500 dark:text-slate-400">
@@ -27,18 +98,18 @@ export function SingupForm({
             <div className="grid gap-6">
                 <div className="grid gap-2">
                     <Label htmlFor="username">Username</Label>
-                    <Input id="username" type="username" placeholder="username" required />
+                    <Input {...register("username")} name="username" id="username" type="username" placeholder="username" required />
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" placeholder="x@xox.com" required />
+                    <Input {...register("email")} name="email" id="email" type="email" placeholder="x@xox.com" required />
                 </div>
                 <div className="grid gap-2">
                     {/* TODO: EYE OPENER FOR PASSWORD */}
                     <div className="flex items-center">
                         <Label htmlFor="password">Create Password</Label>
                     </div>
-                    <Input id="password" type="password" placeholder="********" required />
+                    <Input {...register("password")} name="password" id="password" type="password" placeholder="********" required />
                 </div>
                 <div className="gap-2 flex flex-row">
                     <Label
@@ -52,24 +123,28 @@ export function SingupForm({
                         <Camera className="w-5 h-5 text-base-200" />
                         Upload avatar
                         <Input
+                            {...register("avatar")}
+                            name="avatar"
                             type="file"
                             id="avatar-upload"
                             className="hidden"
                             accept="image/*"
-                            required
                         />
                     </Label>
-                    <div  className="py-3">
-                    <Select>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="MEMBER">Member</SelectItem>
-                            <SelectItem value="ADMIN">Admin</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
+                    <div className="py-3">
+                        <Select
+                            defaultValue="MEMBER"
+                            onValueChange={(value) => setValue("role", value)} // Use setValue instead
+                        >
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="MEMBER">Member</SelectItem>
+                                <SelectItem value="ADMIN">Admin</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
                 <Button type="submit" className=" cursor-pointer w-full">
                     SignUp
@@ -84,7 +159,7 @@ export function SingupForm({
                 </div>
 
                 {/* TODO : GOOGLE AUTH */}
-                <Button variant="ghost" className=" w-full">
+                <Button disabled={isLoading} variant="ghost" className=" w-full">
                     <svg width="62" height="63" viewBox="0 0 62 63" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M59.659 26.023L34.3693 26.0217C33.2526 26.0217 32.3474 26.9414 32.3474 28.0761V36.2852C32.3474 37.4196 33.2526 38.3395 34.3692 38.3395H48.6108C47.0513 42.4519 44.1407 45.8958 40.4272 48.0841L46.4997 58.7656C56.2409 53.0411 62 42.997 62 31.7532C62 30.1523 61.8838 29.0078 61.6516 27.7192C61.475 26.7401 60.6385 26.023 59.659 26.023Z" fill="#167EE6" />
                         <path d="M30.9961 50.6739C24.0266 50.6739 17.9422 46.8046 14.6745 41.0789L4.16263 47.2354C9.51203 56.656 19.5332 62.9999 30.9961 62.9999C36.6194 62.9999 41.9255 61.4615 46.4963 58.7804V58.7658L40.4238 48.0841C37.6461 49.7211 34.4317 50.6739 30.9961 50.6739Z" fill="#12B347" />
@@ -102,6 +177,6 @@ export function SingupForm({
                     Log In
                 </a>
             </div>
-        </form>)
+        </form>
     );
 }

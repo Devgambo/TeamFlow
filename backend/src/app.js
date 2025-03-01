@@ -21,9 +21,9 @@ import projectRouter from "./routes/project.route.js"
 import taskRouter from "./routes/task.route.js"
 
 //routes declaration
-app.use("/api/colpro", userRouter)
-app.use("/api/colpro/projects", projectRouter)
-app.use("/api/colpro/projects/:id/tasks", taskRouter)
+app.use("/api/v1/users", userRouter)
+app.use("/api/v1/projects", projectRouter)
+app.use("/api/v1/projects/:id/tasks", taskRouter)
 
 
 export { app }
