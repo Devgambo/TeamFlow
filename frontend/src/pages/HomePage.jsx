@@ -25,7 +25,7 @@ function HomePage() {
                     </ShimmerButton>
                     </div>
                 </div>
-                <div className='w-3xl hidden md:block absolute right-10 top-30 opacity-78'>
+                <div className='w-2xl hidden md:block absolute right-10 top-30 opacity-78'>
                     <img src="src/assets/Hero.png" alt="home-image" />
                 </div>
             </div>

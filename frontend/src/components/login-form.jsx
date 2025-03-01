@@ -3,18 +3,64 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-export function LoginForm({
-  className,
-  ...props
-}){
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useLoginMutation } from "@/features/auth/authApiSlice"
+import { useDispatch } from "react-redux"
+import { setUserCredentials } from "@/features/auth/authSlice"
+import toast from "react-hot-toast"
+import { useNavigate } from "react-router-dom"
+import { useSelector } from "react-redux"
+import { useEffect } from "react"
 
+const schema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+})
 
+export function LoginForm({ className }) {
+  const dispatch = useDispatch()
+  const [login, { isLoading }] = useLoginMutation()
+  const navigate = useNavigate()
+  const { user, isLoggedIn } = useSelector((state) => state.auth)
+  const {
+    register,
+    handleSubmit,
+  } = useForm({
+    resolver: zodResolver(schema)
+  })
 
+  useEffect(() => {
+    
+    console.log("isLoggedIn:", isLoggedIn);
+    console.log("user:", user);
+    if (isLoggedIn && user) {
+      if (user.role === "ADMIN") {
+        navigate("/dashboard-admin")
+      } else if (user.role === "MEMBER") {
+        navigate("/dashboard-member")
+      }
+    }
+  }, [isLoggedIn, user, navigate])
 
+  const onSubmit = async (data) => {
+    try {
+      console.log(data)
+      console.log("isLoggedIn:", isLoggedIn);
+      const response = await login(data)
+      toast.success(`${response.message}`)
+      console.log(response.data)
+      dispatch(setUserCredentials(response.data.data))
 
+    } catch (error) {
+      console.error(error)
+      toast.error(error?.data?.message || "Something went wrong")
+    }
+  }
 
   return (
-    (<form className={cn("flex flex-col gap-6", className)} {...props}>
+    (<form onSubmit={handleSubmit(onSubmit)} className={cn("flex flex-col gap-6", className)}>
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Login to your account</h1>
         <p className="text-balance text-sm text-slate-500 dark:text-slate-400">
@@ -24,7 +70,7 @@ export function LoginForm({
       <div className="grid gap-6">
         <div className="grid gap-2">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="x@xox.com" required />
+          <Input {...register("email")} id="email" type="email" placeholder="x@xox.com" required />
         </div>
         <div className="grid gap-2">
           <div className="flex items-center">
@@ -34,9 +80,9 @@ export function LoginForm({
               Forgot your password?
             </a>
           </div>
-          <Input id="password" type="password" placeholder="********" required />
+          <Input {...register("password")} id="password" type="password" placeholder="********" required />
         </div>
-        <Button type="submit" className="w-full">
+        <Button disabled={isLoading} type="submit" className="w-full">
           Login
         </Button>
         <div

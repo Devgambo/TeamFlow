@@ -146,7 +146,7 @@ export function SingupForm({ className }) {
                         </Select>
                     </div>
                 </div>
-                <Button type="submit" className=" cursor-pointer w-full">
+                <Button disabled={isLoading} type="submit" className=" cursor-pointer w-full">
                     SignUp
                 </Button>
 

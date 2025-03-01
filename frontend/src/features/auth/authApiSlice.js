@@ -4,12 +4,21 @@ import { apiSlice } from "@/app/apiSlice";
 export const userApiSlice = apiSlice.injectEndpoints({
     endpoints: builder => ({
 
-        login: builder.mutation({
-            query: (userData) => ({
-                url: `${USERS_URL}/login`,
+        logout: builder.mutation({
+            query: () => ({
+                url: `${USERS_URL}/logout`,
                 method: "POST",
-                body: userData,
             }),
+        }),
+
+        login: builder.mutation({
+            query: (data) => {
+                return {
+                    url: `${USERS_URL}/login`,
+                    method: "POST",
+                    body: data,
+                };
+            },
         }),
 
         signup: builder.mutation({
@@ -21,10 +30,12 @@ export const userApiSlice = apiSlice.injectEndpoints({
                 };
             },
         }),
+    
     }),
 });
 
 export const {
+    useLogoutMutation,
     useLoginMutation,
     useSignupMutation,
 } = userApiSlice;
