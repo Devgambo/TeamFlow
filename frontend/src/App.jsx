@@ -9,6 +9,8 @@ import { Routes, Route} from "react-router-dom"
 import Layout from "./components/Layout"
 import DashboardAdmin from "./pages/DashboardAdmin"
 import DashboardMember from "./pages/DashboardMember"
+import TaskPageAdmin from "./pages/TaskPageAdmin"
+import TaskPageMember from "./pages/TaskPageMember"
 
 function App() {
 
@@ -24,10 +26,12 @@ function App() {
         {/* protected routes */}
             <Route path="dashboard-admin" element={<DashboardAdmin/>}/>
             <Route path="dashboard-member" element={<DashboardMember/>}/>
+            <Route path="admin/:projectId" element={<TaskPageAdmin/>}/>
+            <Route path="member/:projectId" element={<TaskPageMember/>}/>
 
         </Route>
       </Routes>
-      <Toaster  position="top-left"  reverseOrder={false}/>
+      <Toaster  position="top-right"  reverseOrder={false}/>
     </div>
   )
 }

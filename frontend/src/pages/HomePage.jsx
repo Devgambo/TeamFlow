@@ -1,10 +1,18 @@
 import React from 'react'
 import Navbar from '../components/Navbar'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ShimmerButton } from '@/components/magicui/shimmer-button'
+import { useSelector } from 'react-redux'
 function HomePage() {
+    const navigate = useNavigate();
+    const { user } = useSelector( state=>state.auth );
+    console.log(user.role)
+    const handelclick = () =>{
+        if(user.role=="ADMIN")  navigate("/dashboard-admin")
+        if(user.role=="MEMBER")  navigate("/dashboard-member")
+    }
     return (
-        <div>
+        <div className='w-full'>
             <Navbar />
             <div className='flex px-10 py-10'>
                 <div>
@@ -18,7 +26,7 @@ function HomePage() {
                         and stay on top of deadlines effortlessly
                     </div>
                     <div  className='px-8'>
-                    <ShimmerButton  className="shadow-2xl">
+                    <ShimmerButton onClick={handelclick}  className="shadow-2xl">
                         <span className="whitespace-pre-wrap font-righteous text-center text-2xl font-medium leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg">
                             GET STARTED
                         </span>

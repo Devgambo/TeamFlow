@@ -263,6 +263,15 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         )
 })
 
+const getAllMembers = asyncHandler(async(req,res)=>{
+    const members = await User.find({role: "MEMBER"})
+    if(!members){
+        ApiError(404, "Members not found")
+    }
 
+    return   res
+    .status(200)
+    .json(new ApiResponse(200, members, "Members Fetched Successfully"))
+})
 
-export { signupUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, updateUserAvatar }
+export { signupUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, updateUserAvatar, getAllMembers }

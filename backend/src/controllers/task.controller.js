@@ -8,27 +8,23 @@ import {User} from "../models/user.model.js"
 const getAllTask = asyncHandler(async(req,res)=>{
     const {id} = req.params
     const tasks = await Task.find({Ofproject: id})
-    const members = await User.find({role: "MEMBER"})
-    if(!members){
-        ApiError(404, "Members not found")
-    }
 
     if(!tasks){
         res
         .status(200)
-        .json(new ApiResponse(200, members, "Members Fetched Successfully"))
+        .json(new ApiResponse(200, {}, "No tasks found!"))
     }
 
     res
     .status(200)
-    .json(new ApiResponse(200, {members, tasks}, "Members and Tasks Fetched Successfully"))
+    .json(new ApiResponse(200, tasks, "Tasks Fetched Successfully"))
 })
 
 const createTask = asyncHandler(async(req,res)=>{
     const {id} = req.params     //project id
     const currUser = req.user
     if(currUser.role!=="ADMIN"){
-        ApiError(403,"Only Admins can create Projects")
+        ApiError(403,"Only Admins can create tasks")
     }
     const {title, desc, priority, username} = req.body
     if(!title || !desc){
@@ -47,7 +43,7 @@ const createTask = asyncHandler(async(req,res)=>{
 
     res
     .status(201)
-    .redirect(`/api/colpro/projects/${id}/tasks`)
+    .json(new ApiResponse(200, task , "Task created successfully"))
 })
 
 const getTaskById = asyncHandler(async(req,res)=>{

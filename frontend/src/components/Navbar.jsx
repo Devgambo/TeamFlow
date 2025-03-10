@@ -7,7 +7,7 @@ import { useLogoutMutation } from '@/features/auth/authApiSlice'
 function Navbar() {
 
     const [logout, {isLoading}] = useLogoutMutation('logout')
-    const { isLoggedIn } = useSelector(state => state.auth)
+    const { isLoggedIn, user } = useSelector(state => state.auth)
     const dispatch = useDispatch();
     const navigate = useNavigate()
     const logoutHandler = async()=>{
@@ -55,11 +55,19 @@ function Navbar() {
                         </Link>
                         </>
                         :
+                        <>
                         <button disabled={isLoading} className='cursor-pointer' onClick={()=>logoutHandler()}>
                             <div className='rounded-full px-4 py-2' style={{ backgroundColor: '#310963' }}>
                                 <span className='text-white font-roboto-slab'>Logout</span>
                             </div>
                         </button>
+                        <div>
+                            {/* AVATAR CIRCLE :TODO  --onclicking should redirect to profile page*/}
+                            <span className='text-white font-roboto-slab'>
+                                {user.username}
+                            </span>
+                        </div>
+                        </>
                         }
                     </div>
                 </div>

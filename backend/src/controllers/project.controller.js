@@ -12,7 +12,7 @@ const createProject = asyncHandler(async(req,res)=>{
         throw new ApiError(403, "Only Admin can create project")
     }
 
-    const {name, description, status} = req.body
+    const {name, description} = req.body
     if (!name || !description) {
         throw new ApiError(400, "All Feilds are required")
     }
@@ -20,56 +20,65 @@ const createProject = asyncHandler(async(req,res)=>{
     const project = await Project.create({
         name,
         description,
-        status,
         createdBy: currUser._id
     })
 
     return res
     .status(201)
     .json(new ApiResponse(201, project, "New Project Created Successfully"))
-    .redirect(`/api/colpro/projects`)
-
-    
 })
 
 const getAllProjects = asyncHandler(async(req,res)=>{
-    const curruser = req.user
-    if(curruser.role === "ADMIN"){
-        const projects = await Project.find({createdBy: curruser._id})
-    }
-    if(curruser.role === "MEMBER" ){
-        const projects = await Task.aggregate([
-            {
-                $match: { AssignedTo:curruser._id }
-            },
-            {
-                $lookup: {
-                    from: "projects",
-                    localField: "Ofproject",
-                    foreignField: "_id",
-                    as: "projectDetails",
+    console.log("Getting projects for user:", req.user);
+    console.log("User role:", req.user.role);
+    console.log("User ID:", req.user._id);
+    
+    const curruser = req.user;
+    let projects;
+
+    try {
+        if(curruser.role === "ADMIN"){
+            console.log("Fetching projects for ADMIN");
+            projects = await Project.find({createdBy: curruser._id});
+            console.log("Found projects:", projects);
+        }
+        if(curruser.role === "MEMBER" ){
+            projects = await Task.aggregate([
+                {
+                    $match: { AssignedTo:curruser._id }
+                },
+                {
+                    $lookup: {
+                        from: "projects",
+                        localField: "Ofproject",
+                        foreignField: "_id",
+                        as: "projectDetails",
+                    }
+                },
+                {
+                    $unwind: "$projectDetails"
+                },
+                {
+                    $group: {
+                        _id: "$projectDetails._id",
+                        projectName: { $first: "$projectDetails.name" },
+                        description: { $first: "$projectDetails.description" },
+                        status: { $first: "$projectDetails.status" },
+                        createdBy: { $first: "$projectDetails.createdBy" },
+                    }
                 }
-            },
-            {
-                $unwind: "$projectDetails"
-            },
-            {
-                $group: {
-                    _id: "$projectDetails._id",
-                    projectName: { $first: "$projectDetails.name" },
-                    description: { $first: "$projectDetails.description" },
-                    status: { $first: "$projectDetails.status" },
-                    createdBy: { $first: "$projectDetails.createdBy" },
-                }
-            }
-        ])
+            ])
+        }
+        if(!projects || projects.length === 0){
+            throw new ApiError(405, "Projects not found")
+        }
+        return res
+        .status(200)
+        .json(new ApiResponse(200, projects, "All Projects Fetched Successfully"))
+    } catch (error) {
+        console.error("Error fetching projects:", error);
+        throw new ApiError(500, `Error fetching projects: ${error.message}`);
     }
-    if(!projects){
-        throw new ApiError(405, "Projects not found")
-    }
-    res
-    .status(200)
-    .json(new ApiResponse(200, projects, "All Projects Fetched Successfully"))
 })
 
 const updateProject = asyncHandler(async(req,res)=>{
@@ -131,6 +140,8 @@ const getProjectById = asyncHandler(async(req,res)=>{
     // .json(new ApiResponse(201, members, "All Members Fetched Successfully"))
     // .json(new ApiResponse(201, project, "Project Fetched Successfully"))
 })
+
+
 
 
 export {createProject, getAllProjects, updateProject, deleteProject}

@@ -26,7 +26,7 @@ const projectSchema = new mongoose.Schema({
         enum: ["PENDING", "IN_PROGRESS", "COMPLETED"],
         default: "PENDING"
     },
-
+    
 }, {timestamps: true})
 
 export const Project = mongoose.model("Project", projectSchema)

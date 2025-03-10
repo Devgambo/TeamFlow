@@ -4,5 +4,4 @@ process.env.NODE_ENV === "development"
   : "";
 
 export const USERS_URL = "/api/v1/users";
-// export const PROJECT_URL = "/api/v1/users";
-// export const TASK_URL = "/api/v1/users";
+export const PROJECT_URL = "/api/v1/projects";

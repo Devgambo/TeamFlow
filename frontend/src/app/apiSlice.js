@@ -53,6 +53,12 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 
   let result = await baseQuery(args, api, extraOptions);
 
+  if (result.error) {
+    console.error('API Error:', result.error);
+    console.error('Status:', result.error.status);
+    console.error('Data:', result.error.data);
+  }
+
   if (result.error && result.error.status === 401) {
     console.error("Unauthorized! Logging out...");
     api.dispatch(logoutUser("Session expired, please login again"));
